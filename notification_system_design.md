@@ -260,3 +260,66 @@ Create indexes on frequently searched columns.
 ## Recommended Approach
 
 Use Redis Caching + WebSockets + Pagination + Proper Database Indexing for best performance.
+
+
+
+# Stage 5
+
+## Shortcomings Of Current Implementation
+
+1. The process is sequential and slow because notifications are sent one student at a time.
+2. If the email API becomes slow, the entire process slows down.
+3. If email delivery fails for some students, notifications may be missed.
+4. The system does not scale well for 50,000 students.
+5. There is no retry mechanism for failed notifications.
+
+## What If Email Fails For 200 Students?
+
+The failed email deliveries should be logged and retried later.
+
+A retry queue can be maintained for students whose email delivery failed.
+
+This ensures that notifications are eventually delivered.
+
+## Improved Design
+
+Use a message queue such as RabbitMQ, Kafka, or AWS SQS.
+
+The application should place notification jobs into the queue.
+
+Background workers can process these jobs independently and send emails, save notifications in the database, and push in-app notifications.
+
+This improves scalability and reliability.
+
+## Should Everything Be Wrapped In A Transaction?
+
+No.
+
+Database operations can be transactional, but email delivery and push notifications are external operations and cannot be reliably rolled back.
+
+Instead, failures should be handled using retries and queues.
+
+## Revised Pseudocode
+
+```text
+function notify_all(student_ids, message):
+
+    enqueue(student_ids, message)
+
+worker():
+
+    while queue_not_empty():
+
+        job = dequeue()
+
+        for student_id in job.student_ids:
+
+            try:
+                save_to_db(student_id, message)
+                send_email(student_id, message)
+                push_to_app(student_id, message)
+
+            catch error:
+                log_failure(student_id)
+                retry_queue(student_id, message)
+```
