@@ -193,3 +193,70 @@ FROM notifications
 WHERE notification_type = 'Placements'
 AND createdAt >= NOW() - INTERVAL '7 days';
 ```
+
+
+# Stage 4
+
+## Problem
+
+Currently, notifications are fetched from the database every time a student loads a page. This creates a large number of database requests and can overwhelm the database, resulting in slow response times and poor user experience.
+
+## Solution 1: Caching Using Redis
+
+Store frequently accessed notifications in Redis cache.
+
+### Advantages
+
+- Faster response times
+- Reduced database load
+- Improved user experience
+
+### Tradeoffs
+
+- Additional infrastructure required
+- Cache invalidation must be handled correctly
+
+## Solution 2: Real-Time Notifications Using WebSockets
+
+Instead of requesting notifications on every page load, the server can push notifications to students in real time.
+
+### Advantages
+
+- Instant notification delivery
+- Fewer database queries
+
+### Tradeoffs
+
+- More complex implementation
+- Persistent connections consume server resources
+
+## Solution 3: Pagination
+
+Example:
+
+GET /notifications?page=1&limit=20
+
+### Advantages
+
+- Reduced data transfer
+- Faster API responses
+
+### Tradeoffs
+
+- Additional API logic required
+
+## Solution 4: Database Indexing
+
+Create indexes on frequently searched columns.
+
+### Advantages
+
+- Faster query execution
+
+### Tradeoffs
+
+- Increased storage consumption
+
+## Recommended Approach
+
+Use Redis Caching + WebSockets + Pagination + Proper Database Indexing for best performance.
