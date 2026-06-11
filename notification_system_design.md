@@ -62,3 +62,82 @@ Flow:
 2. New notification is created.
 3. Server pushes notification instantly to connected users.
 4. User receives notification without refreshing the page.
+
+
+# Stage 2
+
+## Database Choice
+
+I would use PostgreSQL because it provides reliable storage, supports relationships between users and notifications, and offers good query performance.
+
+## Database Schema
+
+### Users Table
+
+```sql
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(100) UNIQUE
+);
+```
+
+### Notifications Table
+
+```sql
+CREATE TABLE notifications (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255),
+    message TEXT,
+    type VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### UserNotifications Table
+
+```sql
+CREATE TABLE user_notifications (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id),
+    notification_id INT REFERENCES notifications(id),
+    is_read BOOLEAN DEFAULT FALSE
+);
+```
+
+## Problems as Data Volume Increases
+
+1. Slow queries
+2. Large storage requirements
+3. High user traffic
+4. Delayed notification delivery
+
+## Solutions
+
+- Indexing
+- Caching using Redis
+- Database partitioning
+- Read replicas
+
+## SQL Queries
+
+### Get All Notifications
+
+```sql
+SELECT * FROM notifications;
+```
+
+### Create Notification
+
+```sql
+INSERT INTO notifications(title, message, type)
+VALUES ('Placement Drive','Amazon Hiring','placement');
+```
+
+### Mark Notification As Read
+
+```sql
+UPDATE user_notifications
+SET is_read = TRUE
+WHERE notification_id = 1;
+```
