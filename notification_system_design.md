@@ -323,3 +323,30 @@ worker():
                 log_failure(student_id)
                 retry_queue(student_id, message)
 ```
+
+
+# Stage 6
+
+## Approach
+
+A priority inbox is implemented by ranking unread notifications using a weighted priority system.
+
+Priority Order:
+
+1. Placements
+2. Result
+3. Event
+
+If two notifications have the same priority, the newer notification is ranked higher using the createdAt timestamp.
+
+The API is used as the source of notifications and no notifications are hardcoded.
+
+The system filters unread notifications, sorts them according to priority and recency, and returns the top N notifications (10, 15, 20, etc.).
+
+## Maintaining Top 10 Continuously
+
+As new notifications arrive, the priority list should be recalculated.
+
+A priority queue (max heap) can be maintained in memory so that insertion of new notifications remains efficient.
+
+This allows the system to always keep the highest-priority unread notifications available for display.
